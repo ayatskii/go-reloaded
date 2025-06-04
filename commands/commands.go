@@ -2,27 +2,42 @@ package reload
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	cleaner "reload/cleaner"
 	"strconv"
 	"strings"
 	"unicode"
-
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 var (
-	command = regexp.MustCompile(`(?i)\( ?(hex|bin|up|low|cap)(,? (-*\d+)?)?\)`)
+	command = regexp.MustCompile(`(?i)\( ?(hex|bin|up|low|cap)(,? (-*\d+)?)?\) *`)
 )
+
+func cap(str string) string {
+	if len(str) == 0 {
+		return str
+	}
+	first := string(str[0])
+	rest := ""
+	if len(str) > 1 {
+		rest = strings.ToLower(str[1:])
+	}
+	switch first {
+	case "'", "\"", "(":
+		if len(str) > 1 {
+			return first + strings.ToUpper(string(str[1])) + rest[1:] + " "
+		}
+		return first
+	default:
+		return strings.ToUpper(first) + rest + " "
+	}
+}
 
 func replace_at_index(input string, replacement string, index int, length int) string {
 	return input[:index] + replacement + input[index+length:]
 }
 func find_words(amount int, s string) ([]int, error) {
 	var res []int
-	srune := []rune(s)
 	ins := command.FindStringIndex(s)
 	start := ins[0]
 	for ; amount > 0; amount-- {
@@ -31,7 +46,7 @@ func find_words(amount int, s string) ([]int, error) {
 			start = 0
 			break
 		}
-		for !unicode.IsLetter(srune[start]) {
+		for !unicode.IsLetter(rune(s[start])) {
 			start--
 			if start < 0 {
 				start = 0
@@ -39,7 +54,7 @@ func find_words(amount int, s string) ([]int, error) {
 			}
 		}
 		res = append(res, start)
-		for unicode.IsLetter(srune[start]) {
+		for unicode.IsLetter(rune(s[start])) {
 			start--
 			if start < 0 {
 				break
@@ -57,11 +72,9 @@ func Proceed_commands(s string) string {
 	res := s
 	for command.FindStringIndex(res) != nil {
 		match := command.FindStringSubmatch(res)
-		fmt.Println(match)
 		amount := 1
 		if match[3] != "" {
 			amount, _ = strconv.Atoi(match[3])
-			fmt.Println(amount)
 			if amount <= 0 {
 				ins := command.FindStringIndex(res)
 				res = replace_at_index(res, "", ins[0], ins[1]-ins[0])
@@ -82,7 +95,7 @@ func Proceed_commands(s string) string {
 				break
 			}
 			word, _ := strconv.ParseInt(res[matches[2]:matches[3]], 16, 64)
-			fmt.Println(word)
+
 			res = replace_at_index(res, strconv.FormatInt(word, 10), matches[2], matches[3]-matches[2])
 		case "bin":
 			bin := regexp.MustCompile(`(\w+)\s*\(\s*bin\s*\)`)
@@ -91,26 +104,23 @@ func Proceed_commands(s string) string {
 				break
 			}
 			word, _ := strconv.ParseInt(res[matches[2]:matches[3]], 2, 64)
-			fmt.Println(word)
 			res = replace_at_index(res, strconv.FormatInt(word, 10), matches[2], matches[3]-matches[2])
 		case "low":
 			for i := 0; i < len(words); i += 2 {
 				word := strings.ToLower(res[words[i+1] : words[i]+1])
-				fmt.Println(word)
+
 				res = replace_at_index(res, word, words[i+1], words[i]-words[i+1]+1)
 			}
 		case "up":
 			for i := 0; i < len(words); i += 2 {
 				word := strings.ToUpper(res[words[i+1] : words[i]+1])
-				fmt.Println(word)
+
 				res = replace_at_index(res, word, words[i+1], words[i]-words[i+1]+1)
 			}
 		case "cap":
 			for i := 0; i < len(words); i += 2 {
 				word := strings.ToLower(res[words[i+1] : words[i]+1])
-				fmt.Println(word)
-				caser := cases.Title(language.English)
-				word = caser.String(word)
+				word = cap(word)
 				res = replace_at_index(res, word, words[i+1], words[i]-words[i+1]+1)
 			}
 		}

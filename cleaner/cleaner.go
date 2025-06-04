@@ -9,7 +9,7 @@ var (
 	single_quote = regexp.MustCompile(`' *(([,.;:!?\w]+)( [,.;:!?\w-]+)*) *'`)
 	punctuations = regexp.MustCompile(`([\w,.!?;:)']+) ([,.!?;:]+)`)
 	punc_after   = regexp.MustCompile(`([,.:;?!])(\w)`)
-	articles     = regexp.MustCompile(`([ |\n])([aA]) (['"(]*[aeiouhAEIOUH]\w+['")]*)`)
+	articles     = regexp.MustCompile(`([ |\n])?([aA]) ((['"]|\( ?)?([aeiouhAEIOUH]\w+)( ?\)|['")])?)`)
 	double_quote = regexp.MustCompile(`" *(([,.;:!?\w]+)( [,.;:!?\w-]+)*) *"`)
 )
 
@@ -61,6 +61,9 @@ func Correct_punctuation(s string) string {
 func Handle_articles(s string) string {
 	res := articles.ReplaceAllStringFunc(s, func(str string) string {
 		sub_matches := articles.FindStringSubmatch(str)
+		if sub_matches[5] == "hex" || sub_matches[5] == "up" {
+			return sub_matches[1] + sub_matches[2] + sub_matches[3]
+		}
 		if sub_matches[2] == "A" {
 			return sub_matches[1] + "An " + sub_matches[3]
 		} else {
