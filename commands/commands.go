@@ -27,13 +27,13 @@ func find_words(amount int, s string) ([]int, error) {
 	start := ins[0]
 	for ; amount > 0; amount-- {
 		start--
-		if start <= 0 {
+		if start < 0 {
 			start = 0
 			break
 		}
 		for !unicode.IsLetter(srune[start]) {
 			start--
-			if start <= 0 {
+			if start < 0 {
 				start = 0
 				break
 			}
@@ -41,20 +41,14 @@ func find_words(amount int, s string) ([]int, error) {
 		res = append(res, start)
 		for unicode.IsLetter(srune[start]) {
 			start--
-			if start <= 0 {
+			if start < 0 {
 				break
 			}
 		}
-		res = append(res, start)
+		res = append(res, start+1)
 	}
 	if len(res) == 0 {
 		return res, errors.New("zero words")
-	} else if len(res)%2 == 1 {
-		if s[res[len(res)-1]] == byte(' ') {
-			return make([]int, 0), errors.New("not enough words")
-		} else {
-			res = append(res, 0)
-		}
 	}
 	return res, nil
 }
