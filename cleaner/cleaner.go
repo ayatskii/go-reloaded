@@ -9,7 +9,8 @@ var (
 	single_quote = regexp.MustCompile(`' *(([,.;:!?\w]+)( [,.;:!?\w-]+)*) *'`)
 	punctuations = regexp.MustCompile(`([\w,.!?;:)']+) ([,.!?;:]+)`)
 	punc_after   = regexp.MustCompile(`([,.:;?!])(\w)`)
-	articles     = regexp.MustCompile(`([aA]) ['(]*([aeiouhAEIOUH]\w+)[')]*`)
+	articles     = regexp.MustCompile(`([ |\n])([aA]) (['"(]*[aeiouhAEIOUH]\w+['")]*)`)
+	double_quote = regexp.MustCompile(`" *(([,.;:!?\w]+)( [,.;:!?\w-]+)*) *"`)
 )
 
 func Clean_text(s string) string {
@@ -18,7 +19,9 @@ func Clean_text(s string) string {
 		res = Correct_punctuation(res)
 	}
 	res = Clear_single_quotes(res)
+	res = Clear_double_quotes(res)
 	res = Handle_articles(res)
+
 	return res
 }
 
@@ -31,6 +34,14 @@ func Clear_single_quotes(s string) string {
 	res := single_quote.ReplaceAllStringFunc(s, func(s string) string {
 		sub_matches := single_quote.FindStringSubmatch(s)
 		return "'" + sub_matches[1] + "'"
+	})
+	return res
+}
+
+func Clear_double_quotes(s string) string {
+	res := double_quote.ReplaceAllStringFunc(s, func(s string) string {
+		sub_matches := double_quote.FindStringSubmatch(s)
+		return "\"" + sub_matches[1] + "\""
 	})
 	return res
 }
@@ -50,10 +61,10 @@ func Correct_punctuation(s string) string {
 func Handle_articles(s string) string {
 	res := articles.ReplaceAllStringFunc(s, func(str string) string {
 		sub_matches := articles.FindStringSubmatch(str)
-		if sub_matches[1] == "A" {
-			return "An " + sub_matches[2]
+		if sub_matches[2] == "A" {
+			return sub_matches[1] + "An " + sub_matches[3]
 		} else {
-			return "an " + sub_matches[2]
+			return sub_matches[1] + "an " + sub_matches[3]
 		}
 	})
 	return res
