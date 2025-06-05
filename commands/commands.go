@@ -89,16 +89,15 @@ func Proceed_commands(s string) string {
 		}
 		switch strings.ToLower(match[1]) {
 		case "hex":
-			hex := regexp.MustCompile(`(\w+)\s*\(\s*hex\s*\)`)
+			hex := regexp.MustCompile(`(\w+)\s*(?i)\(\s*hex\s*\)`)
 			matches := hex.FindStringSubmatchIndex(res)
 			if len(matches) != 4 {
 				break
 			}
 			word, _ := strconv.ParseInt(res[matches[2]:matches[3]], 16, 64)
-
 			res = replace_at_index(res, strconv.FormatInt(word, 10), matches[2], matches[3]-matches[2])
 		case "bin":
-			bin := regexp.MustCompile(`(\w+)\s*\(\s*bin\s*\)`)
+			bin := regexp.MustCompile(`(\w+)\s*(?i)\(\s*bin\s*\)`)
 			matches := bin.FindStringSubmatchIndex(res)
 			if len(matches) != 4 {
 				break
@@ -125,7 +124,7 @@ func Proceed_commands(s string) string {
 			}
 		}
 		ins := command.FindStringIndex(res)
-		res = replace_at_index(res, "", ins[0], ins[1]-ins[0])
+		res = replace_at_index(res, " ", ins[0], ins[1]-ins[0])
 		res = cleaner.Clean_text(res)
 	}
 	return res
