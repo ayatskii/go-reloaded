@@ -16,25 +16,25 @@ var (
 )
 
 func Clean_text(s string) string {
-	res := Delete_spaces(s)
-	res = Correct_punctuation(res)
-	res = Clear_single_quotes(res)
-	res = Clear_double_quotes(res)
-	res = Clear_scopes(res)
-	res = Correct_punctuation(res)
-	res = Handle_delimeters(res)
-	res = Delete_spaces(res)
-	res = Handle_articles(res)
+	res := delete_spaces(s)
+	res = correct_punctuation(res)
+	res = clear_single_quotes(res)
+	res = clear_double_quotes(res)
+	res = clear_scopes(res)
+	res = correct_punctuation(res)
+	res = handle_delimeters(res)
+	res = delete_spaces(res)
+	res = handle_articles(res)
 
 	return res
 }
 
-func Delete_spaces(s string) string {
+func delete_spaces(s string) string {
 	res := spaces.ReplaceAllString(s, " ")
 	return res
 }
 
-func Clear_single_quotes(s string) string {
+func clear_single_quotes(s string) string {
 	res := single_quote.ReplaceAllStringFunc(s, func(s string) string {
 		sub_matches := single_quote.FindStringSubmatch(s)
 		return "'" + sub_matches[1] + "'"
@@ -42,7 +42,7 @@ func Clear_single_quotes(s string) string {
 	return res
 }
 
-func Clear_double_quotes(s string) string {
+func clear_double_quotes(s string) string {
 	res := double_quote.ReplaceAllStringFunc(s, func(s string) string {
 		sub_matches := double_quote.FindStringSubmatch(s)
 		return "\"" + sub_matches[1] + "\""
@@ -50,7 +50,7 @@ func Clear_double_quotes(s string) string {
 	return res
 }
 
-func Clear_scopes(s string) string {
+func clear_scopes(s string) string {
 	res := scopes.ReplaceAllStringFunc(s, func(s string) string {
 		sub_matches := scopes.FindStringSubmatch(s)
 		return "(" + sub_matches[1] + ")"
@@ -58,7 +58,7 @@ func Clear_scopes(s string) string {
 	return res
 }
 
-func Correct_punctuation(s string) string {
+func correct_punctuation(s string) string {
 	res := punctuations.ReplaceAllStringFunc(s, func(s string) string {
 		spa := regexp.MustCompile(` `)
 		return spa.ReplaceAllString(s, "")
@@ -70,7 +70,7 @@ func Correct_punctuation(s string) string {
 	return res
 }
 
-func Handle_delimeters(s string) string {
+func handle_delimeters(s string) string {
 	res := delimeter.ReplaceAllStringFunc(s, func(str string) string {
 		matche := delimeter.FindString(str)
 		return " " + matche + " "
@@ -78,7 +78,7 @@ func Handle_delimeters(s string) string {
 	return res
 }
 
-func Handle_articles(s string) string {
+func handle_articles(s string) string {
 	res := articles.ReplaceAllStringFunc(s, func(str string) string {
 		sub_matches := articles.FindStringSubmatch(str)
 		if sub_matches[6] == "hex" || sub_matches[6] == "up" {
