@@ -5,14 +5,16 @@ import (
 )
 
 var (
-	spaces       = regexp.MustCompile(` {2,}`)
-	single_quote = regexp.MustCompile(`' *(([,.;:!?\w]+)( [,.;:!?\w-]+)*) *'`)
-	punctuations = regexp.MustCompile(`([\w,.!?;:)']+) ([,.!?;:]+)`)
-	punc_after   = regexp.MustCompile(`([,.:;?!])(\w)`)
-	articles     = regexp.MustCompile(`(([ |\n])?(?:\s|^))([aA]) ((['"]|\( ?)?([aeiouhAEIOUH]\w+)( ?\)|['")])?)`)
-	double_quote = regexp.MustCompile(`" *(([,.;:!?\w]+)( [,.;:!?\w-]+)*) *"`)
-	scopes       = regexp.MustCompile(`\( *(([,.;:!?\w]+)( [,.;:!?\w-]+)*) *\)`)
-	delimeter    = regexp.MustCompile(`['"(]\w+['")]`)
+	spaces          = regexp.MustCompile(` {2,}`)
+	single_quote    = regexp.MustCompile(`' *(([,.;:!?\w]+)( [,.;:!?\w-]+)*) *'`)
+	punctuations    = regexp.MustCompile(`([\w,.!?;:)']+) ([,.!?;:]+)`)
+	punc_after      = regexp.MustCompile(`([,.:;?!])(\w)`)
+	articles        = regexp.MustCompile(`(([ |\n])?(?:\s|^))([aA]) ((['"]|\( ?)?([aeiouhAEIOUH]\w+)( ?\)|['")])?)`)
+	double_quote    = regexp.MustCompile(`" *(([,.;:!?\w]+)( [,.;:!?\w-]+)*) *"`)
+	scopes          = regexp.MustCompile(`\( *(([,.;:!?\w]+)( [,.;:!?\w-]+)*) *\)`)
+	delimeter       = regexp.MustCompile(`['"(]\w+['")]`)
+	delimetrs_empty = regexp.MustCompile(`''|""`)
+	new_line        = regexp.MustCompile(`(\n) +`)
 )
 
 func Clean_text(s string) string {
@@ -23,8 +25,10 @@ func Clean_text(s string) string {
 	res = clear_scopes(res)
 	res = correct_punctuation(res)
 	res = handle_delimeters(res)
+	res = handle_empty_delimetrs(res)
 	res = delete_spaces(res)
 	res = handle_articles(res)
+	res = handle_new_line(res)
 
 	return res
 }
@@ -74,6 +78,20 @@ func handle_delimeters(s string) string {
 	res := delimeter.ReplaceAllStringFunc(s, func(str string) string {
 		matche := delimeter.FindString(str)
 		return " " + matche + " "
+	})
+	return res
+}
+
+func handle_empty_delimetrs(s string) string {
+	res := delimetrs_empty.ReplaceAllStringFunc(s, func(str string) string {
+		return " " + str + " "
+	})
+	return res
+}
+
+func handle_new_line(s string) string {
+	res := new_line.ReplaceAllStringFunc(s, func(str string) string {
+		return "\n"
 	})
 	return res
 }
