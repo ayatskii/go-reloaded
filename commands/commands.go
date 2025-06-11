@@ -94,16 +94,26 @@ func Proceed_commands(s string) string {
 			if len(matches) != 4 {
 				break
 			}
+			initial := res[matches[2]:matches[3]]
 			word, _ := strconv.ParseInt(res[matches[2]:matches[3]], 16, 64)
-			res = replace_at_index(res, strconv.FormatInt(word, 10), matches[2], matches[3]-matches[2])
+			if word == 0 && res[matches[2]:matches[3]] != "0" {
+				res = replace_at_index(res, initial, matches[2], matches[3]-matches[2])
+			} else {
+				res = replace_at_index(res, strconv.FormatInt(word, 10), matches[2], matches[3]-matches[2])
+			}
 		case "bin":
 			bin := regexp.MustCompile(`(\w+)\s*(?i)\(\s*bin\s*\)`)
 			matches := bin.FindStringSubmatchIndex(res)
 			if len(matches) != 4 {
 				break
 			}
+			initial := res[matches[2]:matches[3]]
 			word, _ := strconv.ParseInt(res[matches[2]:matches[3]], 2, 64)
-			res = replace_at_index(res, strconv.FormatInt(word, 10), matches[2], matches[3]-matches[2])
+			if word == 0 && res[matches[2]:matches[3]] != "0" {
+				res = replace_at_index(res, initial, matches[2], matches[3]-matches[2])
+			} else {
+				res = replace_at_index(res, strconv.FormatInt(word, 10), matches[2], matches[3]-matches[2])
+			}
 		case "low":
 			for i := 0; i < len(words); i += 2 {
 				word := strings.ToLower(res[words[i+1] : words[i]+1])
